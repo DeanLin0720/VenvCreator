@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# PyInstaller
+build/
+dist/
+*.spec
+
+# 本機設定（由程式自動產生）
+venv_creator_settings.json
