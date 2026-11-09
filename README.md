@@ -61,7 +61,7 @@ pyinstaller --noconfirm --onedir --windowed --name VenvCreator --icon logo\venv_
 
 ### 設定檔
 
-設定會存在程式同目錄的 `venv_creator_settings.json`，包含上次的建立選項、管理的環境、自訂套件、介面語系與最後開啟的分頁。
+設定會存在程式同目錄的 `venv_creator_settings.json`，包含上次的建立選項、管理的環境、自訂套件與介面語系。
 
 ### 授權
 
@@ -130,7 +130,7 @@ The executable is created at `dist\VenvCreator\VenvCreator.exe`. Distribute the 
 
 ### Configuration
 
-Settings are stored in `venv_creator_settings.json` next to the program, including your last creation options, managed environment, custom packages, the interface language, and the last open tab.
+Settings are stored in `venv_creator_settings.json` next to the program, including your last creation options, managed environment, custom packages, and the interface language.
 
 ### License
 

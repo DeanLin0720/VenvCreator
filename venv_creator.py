@@ -1361,8 +1361,6 @@ class MainWindow(QWidget):
         self.tabs.setCornerWidget(self._build_language_switch(), Qt.TopRightCorner)
         lay.addWidget(self.tabs)
         self.create_page.env_created.connect(self.on_env_created)
-        if self.settings.get("last_tab") is not None:
-            self.tabs.setCurrentIndex(self.settings["last_tab"])
         self.retranslate()
 
     def _build_language_switch(self) -> QWidget:
@@ -1407,7 +1405,6 @@ class MainWindow(QWidget):
         self.create_page.append(tr("可到「管理環境」分頁安裝套件。"))
 
     def closeEvent(self, e):
-        self.settings["last_tab"] = self.tabs.currentIndex()
         save_settings(self.settings)
         super().closeEvent(e)
 
