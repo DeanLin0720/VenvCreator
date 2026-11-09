@@ -31,6 +31,7 @@ from pathlib import Path
 
 import json
 
+from PySide6 import __version__ as PYSIDE_VERSION
 from PySide6.QtCore import Qt, QThread, Signal, QProcess, QPoint
 from PySide6.QtGui import QPalette, QColor, QIcon, QPixmap, QPainter, QPen
 from PySide6.QtWidgets import (
@@ -38,12 +39,14 @@ from PySide6.QtWidgets import (
     QLineEdit, QPushButton, QComboBox, QCheckBox, QPlainTextEdit,
     QFileDialog, QMessageBox, QGroupBox, QTabWidget, QTableWidget,
     QTableWidgetItem, QHeaderView, QAbstractItemView, QScrollArea, QSplitter,
-    QButtonGroup,
+    QButtonGroup, QSizePolicy,
 )
 
 IS_WIN = sys.platform.startswith("win")
 NO_WINDOW = subprocess.CREATE_NO_WINDOW if IS_WIN else 0
 APP_NAME = "VenvCreator"
+APP_VERSION = "1.0.0"
+APP_AUTHOR = "DeanLin"
 
 
 def resource_path(rel: str) -> Path:
@@ -210,6 +213,19 @@ EN = {
     "請先選擇 python.exe。": "Please select python.exe first.",
     "✔ 完成": "✔ Done",
     "執行中…": "Running…",
+    # 關於
+    "關於": "About",
+    "Python 虛擬環境圖形化管理工具 — 建立環境、管理套件與匯出 requirements.txt。":
+        "A graphical tool for Python virtual environments — create environments, manage packages, and export requirements.txt.",
+    "版本 {v}": "Version {v}",
+    "環境資訊": "Environment",
+    "作者": "Author",
+    "設定檔": "Settings file",
+    "相關連結": "Links",
+    "Python 官方網站": "Python Website",
+    "venv 說明文件": "venv Documentation",
+    "pip 說明文件": "pip Documentation",
+    "Python 下載": "Download Python",
 }
 
 _language = "zh"
@@ -399,6 +415,10 @@ def apply_dark_theme(app: QApplication):
         QScrollArea { background: transparent; border: none; }
         QScrollArea > QWidget > QWidget { background: transparent; }
         QLabel#category { color: #4d90fe; font-weight: bold; margin-top: 6px; }
+        QLabel#aboutTitle { font-size: 24pt; font-weight: 600; color: #4d90fe; }
+        QLabel#aboutVersion { font-size: 12pt; }
+        QLabel#aboutMuted { color: #9aa0a6; }
+        QGroupBox#aboutGroup::title { color: #4d90fe; }
         QSplitter::handle { background: transparent; }
         QCheckBox::indicator { width: 16px; height: 16px; border: 1px solid #5a5e66;
                                border-radius: 3px; background: #2b2d30; }
@@ -1229,6 +1249,99 @@ class ManagePage(TranslatablePage):
         self.log.appendPlainText(s)
 
 
+# ---------------------------------------------------------------- 關於
+class AboutPage(TranslatablePage):
+    """分頁三：程式資訊"""
+    LOGO_SIZE = 112
+    LINKS = (("Python 官方網站", "https://www.python.org/"),
+             ("venv 說明文件", "https://docs.python.org/3/library/venv.html"),
+             ("pip 說明文件", "https://pip.pypa.io/"),
+             ("PyPI", "https://pypi.org/"),
+             ("Python 下載", "https://www.python.org/downloads/"))
+
+    def __init__(self):
+        super().__init__()
+        root = QVBoxLayout(self)
+        root.setContentsMargins(24, 18, 24, 18)
+        root.setSpacing(14)
+        root.addLayout(self._build_header())
+        root.addWidget(self._build_info())
+        root.addWidget(self._build_links())
+        root.addStretch(1)
+
+    def _build_header(self):
+        """左邊圖示，右邊名稱、版本與簡介。"""
+        header = QHBoxLayout()
+        header.setSpacing(24)
+        logo = self._logo_label()
+        if logo:
+            header.addWidget(logo)
+        text = QVBoxLayout()
+        text.setSpacing(6)
+        title = QLabel(APP_NAME)
+        title.setObjectName("aboutTitle")
+        version = QLabel()
+        version.setObjectName("aboutVersion")
+        self.live("version", version.setText, lambda: tr("版本 {v}", v=APP_VERSION))
+        desc = self.make(QLabel, "Python 虛擬環境圖形化管理工具 — 建立環境、管理套件與匯出 requirements.txt。")
+        desc.setObjectName("aboutMuted")
+        desc.setWordWrap(True)
+        text.addStretch(1)
+        text.addWidget(title)
+        text.addWidget(version)
+        text.addWidget(desc)
+        text.addStretch(1)
+        header.addLayout(text, 1)
+        return header
+
+    def _build_info(self):
+        box = self.make(QGroupBox, "環境資訊")
+        box.setObjectName("aboutGroup")
+        grid = QGridLayout(box)
+        grid.setHorizontalSpacing(28)
+        grid.setVerticalSpacing(8)
+        grid.setColumnStretch(1, 1)
+        rows = (("作者", APP_AUTHOR),
+                ("Python", sys.version.split()[0]),
+                ("PySide6", PYSIDE_VERSION),
+                ("設定檔", str(settings_file())))
+        for r, (name, value) in enumerate(rows):
+            val = QLabel(value)
+            val.setTextInteractionFlags(Qt.TextSelectableByMouse)
+            val.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)   # 路徑過長時不撐寬視窗
+            val.setToolTip(value)
+            grid.addWidget(self.make(QLabel, name), r, 0)
+            grid.addWidget(val, r, 1)
+        return box
+
+    def _build_links(self):
+        box = self.make(QGroupBox, "相關連結")
+        box.setObjectName("aboutGroup")
+        lay = QVBoxLayout(box)
+        lay.setSpacing(8)
+        for i, (name, url) in enumerate(self.LINKS):
+            lbl = QLabel()
+            lbl.setOpenExternalLinks(True)
+            self.live(f"link{i}", lbl.setText, lambda n=name, u=url: (
+                f'<a href="{u}" style="color:#4d90fe; text-decoration:none;">{tr(n)}</a>'
+                f'&nbsp;&nbsp;<a href="{u}" style="color:#9aa0a6; text-decoration:none;">{u}</a>'))
+            lay.addWidget(lbl)
+        return box
+
+    def _logo_label(self):
+        pm = QPixmap(str(resource_path("logo/venv_creator.png")))
+        if pm.isNull():
+            return None
+        ratio = self.devicePixelRatioF()
+        pm = pm.scaled(int(self.LOGO_SIZE * ratio), int(self.LOGO_SIZE * ratio),
+                       Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        pm.setDevicePixelRatio(ratio)
+        lbl = QLabel()
+        lbl.setPixmap(pm)
+        lbl.setAlignment(Qt.AlignCenter)
+        return lbl
+
+
 # ---------------------------------------------------------------- 主視窗
 class MainWindow(QWidget):
     def __init__(self):
@@ -1243,6 +1356,8 @@ class MainWindow(QWidget):
         self.manage_page = ManagePage(self.settings)
         self.tabs.addTab(self.create_page, "")
         self.tabs.addTab(self.manage_page, "")
+        self.about_page = AboutPage()
+        self.tabs.addTab(self.about_page, "")
         self.tabs.setCornerWidget(self._build_language_switch(), Qt.TopRightCorner)
         lay.addWidget(self.tabs)
         self.create_page.env_created.connect(self.on_env_created)
@@ -1282,8 +1397,10 @@ class MainWindow(QWidget):
         self.setWindowTitle(tr("Python 虛擬環境建立工具"))
         self.tabs.setTabText(0, tr("建立環境"))
         self.tabs.setTabText(1, tr("管理環境"))
+        self.tabs.setTabText(2, tr("關於"))
         self.create_page.retranslate()
         self.manage_page.retranslate()
+        self.about_page.retranslate()
 
     def on_env_created(self, py):
         self.manage_page.set_python(py)
