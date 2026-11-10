@@ -37,6 +37,10 @@ VenvCreator 是 Python 虛擬環境的深色模式圖形化管理工具，以 Py
 - Python 3.10 以上
 - PySide6
 
+### 下載
+
+Windows 可直接到 [Releases](https://github.com/DeanLin0720/VenvCreator/releases) 下載 `VenvCreator-<版本>-windows-x64.zip`，解壓縮後執行 `VenvCreator\VenvCreator.exe`。
+
 ### 安裝與執行
 
 ```bash
@@ -58,6 +62,8 @@ pyinstaller --noconfirm --onedir --windowed --name VenvCreator --icon logo\venv_
 ```
 
 產出的執行檔在 `dist\VenvCreator\VenvCreator.exe`，發布時請帶上整個 `dist\VenvCreator` 資料夾。macOS / Linux 的 `--add-data` 分隔符請改用冒號：`"logo:logo"`。
+
+發布新版時，先更新 `venv_creator.py` 的 `APP_VERSION`，再推送對應的標籤（例如 `v1.0.0`），GitHub Actions 會自動打包並建立 Release。
 
 ### 設定檔
 
@@ -106,6 +112,10 @@ VenvCreator is a dark-mode desktop GUI for Python virtual environments, built wi
 - Python 3.10 or later
 - PySide6
 
+### Download
+
+On Windows, download `VenvCreator-<version>-windows-x64.zip` from [Releases](https://github.com/DeanLin0720/VenvCreator/releases), extract it, and run `VenvCreator\VenvCreator.exe`.
+
 ### Install and Run
 
 ```bash
@@ -127,6 +137,8 @@ pyinstaller --noconfirm --onedir --windowed --name VenvCreator --icon logo\venv_
 ```
 
 The executable is created at `dist\VenvCreator\VenvCreator.exe`. Distribute the entire `dist\VenvCreator` folder. On macOS / Linux, use a colon as the `--add-data` separator: `"logo:logo"`.
+
+To publish a new version, update `APP_VERSION` in `venv_creator.py`, then push a matching tag (for example `v1.0.0`). GitHub Actions builds the app and creates the release automatically.
 
 ### Configuration
 
